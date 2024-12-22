@@ -1,3 +1,7 @@
+### WIP
+
+DO NOT USE YET!!
+
 ### Laravel Cart
 
 A simple shopping cart implementation.
