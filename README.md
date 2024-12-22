@@ -25,3 +25,5 @@ $item = new CartItem(
 // Add the item to the cart
 $cart->add($item);
 ```
+
+See class `App\Cart\Cart` for more methods.
