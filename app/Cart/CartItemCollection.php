@@ -18,6 +18,9 @@ class CartItemCollection extends Collection {
                 $item['taxRate'] ?? 0,
                 $item['model'] ?? null,
                 $item['metaData'] ?? [], 
+                $item['image'] ?? null,
+                $item['imageResolver'] ?? null,
+                $item['group'] ?? ''
             ));
         }
 

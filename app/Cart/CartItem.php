@@ -28,7 +28,8 @@ class CartItem {
         $this->metaData = $metaData;
         $this->image = $image;
         $this->imageResolver = $imageResolver;
-       
+        $this->group = $group;
+        
         if($model){
             $this->setModel($model);
         }
@@ -36,10 +37,40 @@ class CartItem {
         $this->itemKey = $this->generateItemKey();
     }
 
+    public function getId(): string
+    {
+        return $this->id;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getPrice(): float
+    {
+        return $this->price;
+    }
+
+    public function getTaxRate(): float
+    {
+        return $this->taxRate;
+    }
+
+    public function getGroup(): string
+    {
+        return $this->group;
+    }
+
+    public function setGroup(string $group): void
+    {
+        $this->group = $group;
+    }
+
     public function getImage()
     {
         if($this->imageResolver){
-            
+
             $resolver = app($this->imageResolver);
 
             if(!$resolver instanceof ImageResolverInterface){
@@ -83,7 +114,8 @@ class CartItem {
             'metaData' => $this->metaData,
             'model' => $this->model,
             'image' => $this->image,
-            'resolver' => $this->imageResolver,
+            'imageResolver' => $this->imageResolver,
+            'group' => $this->group
         ];
     }
 
@@ -103,7 +135,7 @@ class CartItem {
         $this->model['class'] = get_class($model);	
     }
 
-    protected function getModel(): Model | null
+    public function getModel(): Model | null
     {
         if(empty($this->model)){
             return null;
