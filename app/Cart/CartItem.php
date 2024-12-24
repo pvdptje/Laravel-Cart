@@ -69,6 +69,11 @@ class CartItem {
     protected string $group = '';
 
     /**
+     * @var string The callback to be executed when the cart item is updated.
+     */
+    protected string $callback = '';
+
+    /**
      * CartItem constructor.
      *
      * @param string $id The unique identifier for the cart item.
@@ -81,6 +86,7 @@ class CartItem {
      * @param string|null $image The image associated with the cart item.
      * @param string|null $imageResolver The image resolver class name to use for the cart item.
      * @param string $group The group this cart item belongs to.
+     * @param string $callback The callback to be executed when the cart item is updated.
      */
     public function __construct(
         string $id, 
@@ -92,7 +98,8 @@ class CartItem {
         array $metaData = [], 
         string $image = null, 
         string $imageResolver = null, 
-        string $group = '')
+        string $group = '',
+        string $callback = '')
     {
         $this->id = $id;
         $this->name = $name;
@@ -103,6 +110,7 @@ class CartItem {
         $this->image = $image;
         $this->imageResolver = $imageResolver;
         $this->group = $group;
+        $this->callback = $callback;
 
         if($model){
             $this->setModel($model);
@@ -141,6 +149,11 @@ class CartItem {
         return $this->price;
     }
 
+    public function setPrice(float $price): void
+    {
+        $this->price = $price;
+    }
+
     /**
      * Get the tax rate for the cart item.
      *
@@ -149,6 +162,16 @@ class CartItem {
     public function getTaxRate(): float
     {
         return $this->taxRate;
+    }
+
+    /**
+     * Set the tax rate for the cart item.
+     *
+     * @param float $taxRate
+     */
+    public function setTaxRate(float $taxRate): void
+    {
+        $this->taxRate = $taxRate;
     }
 
     /**
@@ -170,6 +193,15 @@ class CartItem {
     {
         $this->group = $group;
     }
+
+    /**
+     * Set the quantity of the cart item.
+     */
+    public function setQuantity(int $quantity): void
+    {
+        $this->quantity = $quantity;
+    }
+    
 
     /**
      * Get the image associated with the cart item.
@@ -229,8 +261,12 @@ class CartItem {
      *
      * @return array
      */
-    public function getMetaData(): array
+    public function getMetaData($key = null ): array
     {
+        if($key){
+            return $this->metaData[$key];
+        }
+
         return $this->metaData;
     }
 
@@ -251,7 +287,8 @@ class CartItem {
             'model' => $this->model,
             'image' => $this->image,
             'imageResolver' => $this->imageResolver,
-            'group' => $this->group
+            'group' => $this->group,
+            'callback' => $this->callback,
         ];
     }
 
@@ -313,7 +350,7 @@ class CartItem {
             return $this->price;
         }
 
-        return $this->price * (1 + $this->taxRate);
+        return $this->price + ($this->price * ($this->taxRate / 100));
     }
 
     /**
@@ -323,7 +360,27 @@ class CartItem {
      * @return float
      */
     public function total( $ex = true )
-    {
+    { 
         return $this->price($ex) * $this->quantity;
+    }
+
+    /**
+     * Set the callback for the cart item.
+     *
+     * @param string $callback
+     */
+    public function setCallback(string $callback): void
+    {
+        $this->callback = $callback;
+    }
+
+    /**
+     * Get the callback for the cart item.
+     *
+     * @return string
+     */
+    public function getCallback(): string
+    {
+        return $this->callback;
     }
 }

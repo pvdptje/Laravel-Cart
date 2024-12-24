@@ -34,7 +34,8 @@ class CartItemCollection extends Collection {
                 $item['metaData'] ?? [], 
                 $item['image'] ?? null,
                 $item['imageResolver'] ?? null,
-                $item['group'] ?? ''
+                $item['group'] ?? '',
+                $item['callback'] ?? ''
             ));
         }
 

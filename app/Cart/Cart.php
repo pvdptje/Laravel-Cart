@@ -33,6 +33,7 @@ class Cart {
      */
     protected DriverInterface $driver;
 
+
     /**
      * Cart constructor.
      *
@@ -126,11 +127,43 @@ class Cart {
     /**
      * Saves the current cart data to the driver.
      *
+     * @param bool $withCallbacks Whether to run any callbacks associated with the cart items (default is true).
      * @return void
      */
-    protected function save(): void
+    public function save( $withCallbacks = true ): void
     {
+        if($withCallbacks){
+            $this->runCallbacks();
+        }
+
         $this->driver->save($this->storageKey, $this->items->toArray());
+    }
+
+    /**
+     * Runs any callbacks associated with the cart items.
+     *
+     * @return void
+     */
+    protected function runCallbacks(): void
+    {
+     
+        $this->items->filter(function ($item) {
+            return $item->getCallback() !== '';
+        })->each(function ($item) {
+            $callback = $item->getCallback();
+               
+            if (is_string($callback) && strpos($callback, '::') !== false) {
+                list($class, $method) = explode('::', $callback);
+    
+                if (class_exists($class) && method_exists($class, $method)) {
+                    call_user_func([$class, $method], $item, $this);
+                } else {
+                    throw new \Exception("Callback {$callback} is not callable.");
+                }
+            } else {
+                throw new \Exception("Invalid callback format: {$callback}");
+            }
+        });
     }
 
     /**
@@ -138,8 +171,12 @@ class Cart {
      *
      * @return CartItemCollection
      */
-    public function items(): CartItemCollection
+    public function items($group = null): CartItemCollection
     {
+        if($group) {
+            return $this->items->itemsByGroup($group);
+        }
+
         return $this->items;
     }
 
@@ -168,5 +205,39 @@ class Cart {
         return $this->items->itemsByGroup($group)->reduce(function ($total, $item) use ($ex) {
             return $total + $item->total($ex);
         }, 0);
+    }
+
+    public function clear(): void
+    {
+        $this->items = new CartItemCollection();
+        $this->save(false);
+    }
+
+    public function totalItems(): int
+    {
+        return $this->items->reduce(function ($total, $item) {
+            return $total + $item->getQuantity();
+        }, 0);
+    }
+
+    public function totalItemsByGroup($group): int
+    {
+        return $this->items->itemsByGroup($group)->reduce(function ($total, $item) {
+            return $total + $item->getQuantity();
+        }, 0);
+    }
+
+    public function remove($itemKey): void
+    {
+        $this->items = $this->items->filter(function ($item) use ($itemKey) {
+            return $item->getItemKey() !== $itemKey;
+        });
+
+        $this->save();
+    }
+
+    public function isEmpty(): bool
+    {
+        return $this->items->isEmpty();
     }
 }
